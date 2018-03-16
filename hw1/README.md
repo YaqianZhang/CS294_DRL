@@ -3,7 +3,11 @@
 Dependencies: TensorFlow, MuJoCo version 1.31, OpenAI Gym
 
 'BehavioralClone.py' implement BC, training a three-layer neural network using the data from expert policy, and save it in a file
+
+
 'runPolicy.py'execute the trained neural network model in the environment
+
+
 'run_expert.py' also has been changed to include DAgger algorithm
 
 WIP:
