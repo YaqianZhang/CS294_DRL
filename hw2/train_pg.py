@@ -177,13 +177,14 @@ def train_PG(exp_name='',
 
     if discrete:
         # YOUR_CODE_HERE
-        sy_logits_na = TODO
-        sy_sampled_ac = TODO # Hint: Use the tf.multinomial op
+
+        sy_logits_na = build_mlp(sy_ob_no,ac_dim,"discrete")
+        sy_sampled_ac = tf.multinomial(sy_logits_na,) # Hint: Use the tf.multinomial op
         sy_logprob_n = TODO
 
     else:
         # YOUR_CODE_HERE
-        sy_mean = TODO
+        sy_mean = build_mlp(sy_ac_na,ac_dim,"discrete")
         sy_logstd = TODO # logstd should just be a trainable variable, not a network output.
         sy_sampled_ac = TODO
         sy_logprob_n = TODO  # Hint: Use the log probability under a multivariate gaussian. 
