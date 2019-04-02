@@ -51,7 +51,7 @@ def atari_learn(env,
         # notice that here t is the number of steps of the wrapped env,
         # which is different from the number of steps in the underlying env
         return get_wrapper_by_name(env, "Monitor").get_total_steps() >= num_timesteps
-
+    print("steps",num_timesteps)
     exploration_schedule = PiecewiseSchedule(
         [
             (0, 1.0),
@@ -59,6 +59,7 @@ def atari_learn(env,
             (num_iterations / 2, 0.01),
         ], outside_value=0.01
     )
+    
 
     dqn.learn(
         env,
@@ -102,10 +103,11 @@ def get_session():
     print("AVAILABLE GPUS: ", get_available_gpus())
     return session
 
-def get_env(task, seed):
-    env_id = task.env_id
+def get_env(env_id, seed):
+    #env_id = task.env_id
 
     env = gym.make(env_id)
+    max_steps = env._max_episode_steps
 
     set_global_seeds(seed)
     env.seed(seed)
@@ -114,20 +116,28 @@ def get_env(task, seed):
     env = wrappers.Monitor(env, osp.join(expt_dir, "gym"), force=True)
     env = wrap_deepmind(env)
 
-    return env
+    return env,max_steps
 
 def main():
     # Get Atari games.
-    benchmark = gym.benchmark_spec('Atari40M')
+    #benchmark = gym.benchmark_spec('Atari40M')
 
     # Change the index to select a different game.
-    task = benchmark.tasks[3]
+    #task = benchmark.tasks[3]
+    
+    ## zyq: give env_Id (benchmark_spec deleted from  gym lib)
+    
+    my_env_id = 'PongNoFrameskip-v4'
+    
 
     # Run training
     seed = 0 # Use a seed of zero (you may want to randomize the seed!)
-    env = get_env(task, seed)
+    #env = get_env(task, seed)
+    env,max_steps = get_env(my_env_id,seed)
+    
+    
     session = get_session()
-    atari_learn(env, session, num_timesteps=task.max_timesteps)
+    atari_learn(env, session, num_timesteps=8e6)
 
 if __name__ == "__main__":
     main()

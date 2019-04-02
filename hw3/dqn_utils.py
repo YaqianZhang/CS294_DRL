@@ -66,6 +66,7 @@ class PiecewiseSchedule(object):
             raised when outside value is requested.
         """
         idxes = [e[0] for e in endpoints]
+        print("errors: ", idxes, sorted(idxes))
         assert idxes == sorted(idxes)
         self._interpolation = interpolation
         self._outside_value = outside_value
