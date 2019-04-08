@@ -6,6 +6,8 @@ import random
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.layers as layers
+import os
+import time
 
 import dqn
 from dqn_utils import *
@@ -30,7 +32,7 @@ def atari_model(img_in, num_actions, scope, reuse=False):
 
 def atari_learn(env,
                 session,
-                num_timesteps):
+                num_timesteps,logdir):
     # This is just a rough estimate
     num_iterations = float(num_timesteps) / 4.0
 
@@ -59,6 +61,8 @@ def atari_learn(env,
             (num_iterations / 2, 0.01),
         ], outside_value=0.01
     )
+
+
     
 
     dqn.learn(
@@ -75,7 +79,8 @@ def atari_learn(env,
         learning_freq=4,
         frame_history_len=4,
         target_update_freq=10000,
-        grad_norm_clipping=10
+        grad_norm_clipping=10,
+        logdir = logdir
     )
     env.close()
 
@@ -128,6 +133,10 @@ def main():
     ## zyq: give env_Id (benchmark_spec deleted from  gym lib)
     
     my_env_id = 'PongNoFrameskip-v4'
+    if not(os.path.exists('data')):
+        os.makedirs('data')
+    logdir = my_env_id+'_'+time.strftime("%d-%m-%Y_%H-%m-%S")
+    logdir = os.path.join('data',logdir)
     
 
     # Run training
@@ -137,7 +146,8 @@ def main():
     
     
     session = get_session()
-    atari_learn(env, session, num_timesteps=8e6)
+
+    atari_learn(env, session, num_timesteps=20e6,logdir=logdir)
 
 if __name__ == "__main__":
     main()
