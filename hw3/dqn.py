@@ -1,6 +1,7 @@
 import sys
 import gym.spaces
 import itertools
+import logz
 import numpy as np
 import random
 import tensorflow                as tf
@@ -23,7 +24,8 @@ def learn(env,
           learning_freq=4,
           frame_history_len=4,
           target_update_freq=10000,
-          grad_norm_clipping=10):
+          grad_norm_clipping=10,
+          logdir= 'data/test'):
     """Run Deep Q-learning algorithm.
 
     You can specify your own convnet using q_func.
@@ -129,11 +131,12 @@ def learn(env,
     
     # YOUR CODE HERE
     q_s = q_func(obs_t_float, num_actions, scope="q_func", reuse=False)
-    q_s_prime = q_func(obs_tp1_float, num_actions, scope="q_func1", reuse=False)
+    q_s_prime = q_func(obs_tp1_float, num_actions, scope="target_q_func", reuse=False)
     q_func_vars=tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES,scope='q_func')
-    target_q_func_vars= tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES,scope='q_func1')
+    target_q_func_vars= tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES,scope='target_q_func')
     target_q_s= tf.reduce_sum(q_s * tf.one_hot(act_t_ph,num_actions),axis=1)
-    total_error = tf.reduce_sum(rew_t_ph + gamma * tf.reduce_max(q_s_prime,axis=1) - target_q_s)
+    y=rew_t_ph + gamma * tf.reduce_max(q_s_prime,axis=1)
+    total_error = tf.losses.mean_squared_error( y,target_q_s)
 
     ######
 
@@ -162,6 +165,10 @@ def learn(env,
     best_mean_episode_reward = -float('inf')
     last_obs = env.reset()
     LOG_EVERY_N_STEPS = 10000
+
+
+
+    logz.configure_output_dir(logdir)
 
     for t in itertools.count():
         ### 1. Check stopping criterion
@@ -310,4 +317,12 @@ def learn(env,
             print("episodes %d" % len(episode_rewards))
             print("exploration %f" % exploration.value(t))
             print("learning_rate %f" % optimizer_spec.lr_schedule.value(t))
+            logz.log_tabular("Timestep",t)
+            logz.log_tabular("MeanReward",mean_episode_reward)
+            logz.log_tabular("BestMeanReward",best_mean_episode_reward)
+            logz.log_tabular("Episode",len(episode_rewards))
+            logz.log_tabular("Exploration",exploration.value(t))
+            logz.log_tabular("LearningRate",optimizer_spec.lr_schedule.value(t))
+            logz.dump_tabular()
+
             sys.stdout.flush()
