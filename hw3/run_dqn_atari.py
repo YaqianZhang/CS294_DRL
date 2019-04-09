@@ -9,7 +9,7 @@ import tensorflow.contrib.layers as layers
 import os
 import time
 
-import dqn
+import dqn_bpg
 from dqn_utils import *
 from atari_wrappers import *
 

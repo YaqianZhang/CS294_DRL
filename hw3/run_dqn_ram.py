@@ -6,6 +6,7 @@ import random
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.layers as layers
+import time
 
 import dqn
 from dqn_utils import *
@@ -55,7 +56,7 @@ def atari_learn(env,
             (num_iterations / 2, 0.01),
         ], outside_value=0.01
     )
-
+    logdir = 'ram_Pong'+'_'+time.strftime("%d-%m-%Y_%H%m%S")
     dqn.learn(
         env,
         q_func=atari_model,
@@ -70,7 +71,8 @@ def atari_learn(env,
         learning_freq=4,
         frame_history_len=1,
         target_update_freq=10000,
-        grad_norm_clipping=10
+        grad_norm_clipping=10,
+        logdir = logdir
     )
     env.close()
 
