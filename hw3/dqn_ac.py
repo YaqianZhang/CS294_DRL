@@ -141,12 +141,14 @@ def learn(env,
     policy_weight = q_func(obs_t_float, num_actions, scope="policy", reuse=False) #N*1
     policy_vars=tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES,scope='policy')
     prob = tf.nn.softmax(policy_weight,axis = 1) #N*A
-    target_q_s_NA = tf.matmul(tf.reshape(target_q_s,[-1,1]),tf.ones([1,num_actions])) #
-    sign = tf.sign(q_s-target_q_s_NA) #N*A
-    prob_better_set =tf.reduce_sum(tf.maximum(sign,0) * prob ,axis = 1) # N*1
-    prob_worse_set =-tf.reduce_sum(tf.minimum(sign,0) * prob ,axis = 1)
-    bpg_logprob = tf.log(prob_better_set)-tf.log(prob_worse_set)
-    policy_loss = -bpg_logprob
+    # target_q_s_NA = tf.matmul(tf.reshape(target_q_s,[-1,1]),tf.ones([1,num_actions]))
+    # sign = tf.sign(q_s-target_q_s_NA) #N*AS
+    # prob_better_set =tf.reduce_sum(tf.maximum(sign,0) * prob ,axis = 1) # N*1
+    # prob_worse_set =-tf.reduce_sum(tf.minimum(sign,0) * prob ,axis = 1)
+    # bpg_logprob = tf.log(prob_better_set)-tf.log(prob_worse_set)
+    logprob = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=act_t_ph,logits=policy_weight)
+    advantage =target_q_s
+    policy_loss = -tf.reduce_sum(logprob*advantage)
 
     learning_rate_policy = tf.placeholder(tf.float32, (), name="learning_rate_policy")
     optimizer_policy = optimizer_spec.constructor(learning_rate=learning_rate_policy, **optimizer_spec.kwargs)

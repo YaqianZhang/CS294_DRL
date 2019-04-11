@@ -9,7 +9,7 @@ import tensorflow.contrib.layers as layers
 import os
 import time
 
-import dqn_bpg
+import dqn_ac
 from dqn_utils import *
 from atari_wrappers import *
 
@@ -43,7 +43,7 @@ def atari_learn(env,
                                          (num_iterations / 2,  5e-5 * lr_multiplier),
                                     ],
                                     outside_value=5e-5 * lr_multiplier)
-    optimizer = dqn.OptimizerSpec(
+    optimizer = dqn_ac.OptimizerSpec(
         constructor=tf.train.AdamOptimizer,
         kwargs=dict(epsilon=1e-4),
         lr_schedule=lr_schedule
@@ -65,7 +65,7 @@ def atari_learn(env,
 
     
 
-    dqn.learn(
+    dqn_ac.learn(
         env,
         q_func=atari_model,
         optimizer_spec=optimizer,
